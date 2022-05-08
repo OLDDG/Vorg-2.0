@@ -225,21 +225,14 @@ int main()
 		C2Ppn ppn;
 		ppn.convert(removeSpaces(str_in));
 		string function = (string)ppn.get_str_out();
-
 		map<int, int> iter_value;
-		//map <int, int> ::iterator it = iter_value.begin();
 		for (int i = 0; i < iteration_count; i++) {
 			int calc = ppn.calculate(function, x, y);
 			iter_value[i] = calc;
+			cout << '\n' << "Iteration number:" << i << "      Value:" << calc << endl;
 			x = y;
 			y = calc;
 		}
-		map <int, int> ::iterator it = iter_value.begin();
-		while (it != iter_value.end()) {
-			cout << '\n' << "Iteration number:" << it->first << "      Value:" << it->second << endl;
-			it++;
-		} 
-		cout << '\n' << ppn.calculate((string)ppn.get_str_out(), x, y) << '\n' << endl;
 	}
 	catch (LPCSTR exc) {
 		cout << (LPCSTR)exc << '\n' << endl;

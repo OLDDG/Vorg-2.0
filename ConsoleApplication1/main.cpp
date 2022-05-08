@@ -1,6 +1,8 @@
 ﻿#include <iostream>
+#include <sstream>
 #include <windows.h> 
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -14,7 +16,7 @@ class C2Ppn {
 	int prior(char c);            //get the priority of the 
 								  //character  
 public:
-	int calculate(string in, string out);
+	int calculate(string out, int x_in, int y_in);
 	void convert(string);        //convert to PPN                                          
 	string get_str_out() const;   //get the output string
 };
@@ -52,15 +54,18 @@ public:
 
 //if the character is a digit
 inline bool C2Ppn::isXorY(char c) {
-	return (c >= '0' && c <= '9'); //(c == 'x' || c == 'y' || c == 'X' || c == 'Y');
+	return (c == 'x' || c == 'y' || c == 'X' || c == 'Y' || (c >= '0' && c <= '9'));
 }
 
 //the priopity of the operation
 inline int C2Ppn::prior(char c) {
 	switch (c) {
 	case '(': return 1;
-	case '+': case '-': return 2;
-	case '*': case '/': return 3;
+	case '|': case '&': case '#': return 2; //#-xor
+	case '<': case '>': return 3;
+	case '+': case '-': return 4;
+	case '*': case '/': return 5;
+	case '^': return 6;
 	default: return 0;
 	}
 }
@@ -104,7 +109,7 @@ void C2Ppn::convert(string str) {
 			++np;
 			was_op = 0;
 			break;
-		case '*': case '/': case '+': case '-':
+		case '*': case '/': case '+': case '-': case '>':  case '<': case '#': case '&': case '|': case '^':
 			if (iin == str_in.length())
 				throw (string)"Syntax error";
 
@@ -140,29 +145,58 @@ void C2Ppn::convert(string str) {
 		throw (string)"Error: wrong number of brackets";
 }
 
-int C2Ppn::calculate(string str_in, string str_out) {
-	Stack<int> val_stack; //стек
-	int n1 = 0, n2 = 0, res;
-
-	for (int i = 0; i < str_in.length(); ++i) {
-		if (C2Ppn::isXorY(str_out[i])) {
-			val_stack.push(std::atoi(&str_out[i]));
+int C2Ppn::calculate(string str_out, int x_in, int y_in) {
+	Stack <int> stk;
+	int numerator = 0;
+	char check = str_out[numerator];
+	int x = 0, y = 0;
+	int result = 0;
+	while (check != EOF && check != '\n' && check != '\0') {
+		bool flag = true;
+		string num = "";
+		while (check == ' ' || check == '\t') {
+			check = str_out[++numerator];
+		}
+		if (check == 'x' || check == 'X') stk.push(x_in);
+		else if (check == 'y' || check == 'Y') stk.push(y_in);
+		else if (check <= '9' && check >= '0') {
+			while (check <= '9' && check >= '0') {
+				num += check;
+				check = str_out[++numerator];
+				flag = false;
+			}
+			stk.push(stoi(num));
 		}
 		else {
-			if (str_out[i] == ' ') continue;
-			n2 = val_stack.top(); val_stack.pop();
-			n1 = val_stack.top(); val_stack.pop();
-			switch (str_out[i]) {
-			case '+': res = n1 + n2; break;
-			case '-': res = n1 - n2; break;
-			case '*': res = n1 * n2; break;
-			case '/': res = n1 / n2; break;
-			default: cout << "Ошибка !\n";
+			y = stk.top(); stk.pop();
+			x = stk.top(); stk.pop();
+			switch (check) {
+				case '+':
+					stk.push(x + y); break;
+				case '-':
+					stk.push(x - y); break;
+				case '*':
+					stk.push(x * y); break;
+				case '/':
+					stk.push(x / y); break;
+				case '|':
+					stk.push(x | y); break;
+				case '#': //xor
+					stk.push(x ^ y); break;
+				case '&':
+					stk.push(x & y); break;
+				case '<':
+					stk.push(x << y); break;
+				case '>':
+					stk.push(x >> y); break;
+				case '^':
+					stk.push((int)pow(x, y)); break;
 			}
-			val_stack.push(res);
 		}
+		if (flag) numerator++;
+		check = str_out[numerator];
 	}
-	return val_stack.pop();
+	return stk.top();
 }
 
 int main()
@@ -174,11 +208,17 @@ int main()
 		cout << "arithmetical operations and brackets," << endl;
 		cout << "introduce 0 to exit the program):" << endl;
 		cin >> buf;                //get the input string
+		int x, y;
+		cout << '\n' << "Введите x:" << endl;
+		cin >> x;
+		cout << '\n' << "Введите y:" << endl;
+		cin >> y;
 		if (buf[0] == '\0') return 0;
 		str_in = buf;
 		C2Ppn ppn;
 		ppn.convert(str_in);
-		cout << '\n' << ppn.calculate(str_in, (string)ppn.get_str_out()) << '\n' << endl;
+		cout << '\n' << (string)ppn.get_str_out() << endl;
+		cout << '\n' << ppn.calculate((string)ppn.get_str_out(), x, y) << '\n' << endl;
 	}
 	catch (LPCSTR exc) {
 		cout << (LPCSTR)exc << '\n' << endl;

@@ -3,6 +3,7 @@
 #include <windows.h> 
 #include <string>
 #include <cmath>
+#include <map>
 
 using namespace std;
 
@@ -17,6 +18,7 @@ class C2Ppn {
 								  //character  
 public:
 	int calculate(string out, int x_in, int y_in);
+	map<int, int> automat(string func, int x_in, int y_in, int iteration_count)
 	void convert(string);        //convert to PPN                                          
 	string get_str_out() const;   //get the output string
 };
@@ -199,25 +201,43 @@ int C2Ppn::calculate(string str_out, int x_in, int y_in) {
 	return stk.top();
 }
 
+string removeSpaces(string input)
+{
+	input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
+	return input;
+}
+
+map<int, int> C2Ppn::automat(string func, int x_in, int y_in, int iteration_count) {
+	map<int, int> mp;
+	map <int, int> ::iterator it = mp.begin();
+	int x = x_in, y = y_in
+		for (int i = 0, i < iteration_count; i++, it++) {
+		it->first = i;
+		it->second = calculate(func, x, y);
+
+	}
+	return mp;
+}
+
 int main()
 {
 	try {
-		char buf[50];
 		string str_in;
-		cout << "Introduce the expression (use only numbers," << endl;
-		cout << "arithmetical operations and brackets," << endl;
-		cout << "introduce 0 to exit the program):" << endl;
-		cin >> buf;                //get the input string
-		int x, y;
-		cout << '\n' << "Введите x:" << endl;
+		cout << '\n' << "Enter a function F(x, y) = " << endl;
+		getline(cin, str_in);                //get the input string
+		int x, y, iteration_count;
+		cout << '\n' << "Enter the first argument x:" << endl;
 		cin >> x;
-		cout << '\n' << "Введите y:" << endl;
+		cout << '\n' << "Enter the second argument y:" << endl;
 		cin >> y;
-		if (buf[0] == '\0') return 0;
-		str_in = buf;
+		cout << '\n' << "Enter the number of iterations N:" << endl;
+		cin >> iteration_count;
+		if (str_in == "\0") return 0;
 		C2Ppn ppn;
-		ppn.convert(str_in);
-		cout << '\n' << (string)ppn.get_str_out() << endl;
+		ppn.convert(removeSpaces(str_in));
+		map<int, int> iter_value;
+		string function = (string)ppn.get_str_out();
+		//cout << '\n' << (string)ppn.get_str_out() << endl;
 		cout << '\n' << ppn.calculate((string)ppn.get_str_out(), x, y) << '\n' << endl;
 	}
 	catch (LPCSTR exc) {

@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <iterator>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ class C2Ppn {
 								  //character  
 public:
 	int calculate(string out, int x_in, int y_in);
-	map<int, int> automat(string func, int x_in, int y_in, int iteration_count)
+	map<int, int> automat(string func, int x_in, int y_in, int iteration_count);
 	void convert(string);        //convert to PPN                                          
 	string get_str_out() const;   //get the output string
 };
@@ -207,18 +208,6 @@ string removeSpaces(string input)
 	return input;
 }
 
-map<int, int> C2Ppn::automat(string func, int x_in, int y_in, int iteration_count) {
-	map<int, int> mp;
-	map <int, int> ::iterator it = mp.begin();
-	int x = x_in, y = y_in
-		for (int i = 0, i < iteration_count; i++, it++) {
-		it->first = i;
-		it->second = calculate(func, x, y);
-
-	}
-	return mp;
-}
-
 int main()
 {
 	try {
@@ -235,9 +224,21 @@ int main()
 		if (str_in == "\0") return 0;
 		C2Ppn ppn;
 		ppn.convert(removeSpaces(str_in));
-		map<int, int> iter_value;
 		string function = (string)ppn.get_str_out();
-		//cout << '\n' << (string)ppn.get_str_out() << endl;
+
+		map<int, int> iter_value;
+		//map <int, int> ::iterator it = iter_value.begin();
+		for (int i = 0; i < iteration_count; i++) {
+			int calc = ppn.calculate(function, x, y);
+			iter_value[i] = calc;
+			x = y;
+			y = calc;
+		}
+		map <int, int> ::iterator it = iter_value.begin();
+		while (it != iter_value.end()) {
+			cout << '\n' << "Iteration number:" << it->first << "      Value:" << it->second << endl;
+			it++;
+		} 
 		cout << '\n' << ppn.calculate((string)ppn.get_str_out(), x, y) << '\n' << endl;
 	}
 	catch (LPCSTR exc) {

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <map>
 #include <iterator>
+#include <vector> 
 
 using namespace std;
 
@@ -18,8 +19,8 @@ class C2Ppn {
 	int prior(char c);            //get the priority of the 
 								  //character  
 public:
-	int calculate(string out, int x_in, int y_in);
-	map<int, int> automat(string func, int x_in, int y_in, int iteration_count);
+	int calculate_subsequence(string out, int x_in, int y_in);
+	//map<int, int> automat(string func, int x_in, int y_in, int iteration_count);
 	void convert(string);        //convert to PPN                                          
 	string get_str_out() const;   //get the output string
 };
@@ -148,7 +149,7 @@ void C2Ppn::convert(string str) {
 		throw (string)"Error: wrong number of brackets";
 }
 
-int C2Ppn::calculate(string str_out, int x_in, int y_in) {
+int C2Ppn::calculate_subsequence(string str_out, int x_in, int y_in) {
 	Stack <int> stk;
 	int numerator = 0;
 	char check = str_out[numerator];
@@ -212,17 +213,57 @@ int main()
 {
 	try {
 		string str_in;
-		cout << '\n' << "Enter a function F(x, y) = " << endl;
-		getline(cin, str_in);                //get the input string
-		int x, y, iteration_count;
-		cout << '\n' << "Enter the first argument x:" << endl;
-		cin >> x;
-		cout << '\n' << "Enter the second argument y:" << endl;
-		cin >> y;
-		cout << '\n' << "Enter the number of iterations N:" << endl;
-		cin >> iteration_count;
-		if (str_in == "\0") return 0;
-		C2Ppn ppn;
+		int graph_type;
+		int iteration_count;
+		cout << '\n' << "Enter graph type: (1)graph or (2)subsequence" << '\n' << endl;;
+		cin >> graph_type;
+		if (graph_type == 1) {
+			vector <int> x, y;
+			cout << '\n' << "Enter the number of iterations N:" << endl;
+			cin >> iteration_count;
+			cout << '\n' << "Enter " << iteration_count << " first arguments" << endl;
+			int x_i;
+			for (int i = 0; i < iteration_count; i++) {
+				cin >> x_i;
+				x.push_back(x_i);
+			}
+			cout << '\n' << "Enter " << iteration_count << " second arguments" << endl;
+			int y_i;
+			for (int i = 0; i < iteration_count; i++) {
+				cin >> y_i;
+				y.push_back(y_i);
+			}
+			cout << '\n' << "Enter your function without spaces F(x, y) = ";
+			//getline(cin, str_in);
+			cin >> str_in;
+			if (str_in == "\0") return 0;
+			///TODO add graph func
+		}
+		if (graph_type == 2) {
+			int x, y;
+			cout << '\n' << "Enter the number of iterations N:" << '\n' << endl;
+			cin >> iteration_count;
+			cout << '\n' << "Enter the first argument x:" << '\n' << endl;
+			cin >> x;
+			cout << '\n' << "Enter the second argument y:" << '\n' << endl;
+			cin >> y;
+			cout << '\n' << "Enter a function without spaces F(x, y) = " << '\n' << endl;
+			//getline(cin, str_in);
+			cin >> str_in;
+			if (str_in == "\0") return 0;
+			C2Ppn ppn;
+			ppn.convert(removeSpaces(str_in));
+			string function = (string)ppn.get_str_out();
+			map<int, int> iter_value;
+			for (int i = 0; i < iteration_count; i++) {
+				int calc = ppn.calculate_subsequence(function, x, y);
+				iter_value[i] = calc;
+				cout << '\n' << "Iteration number:" << i << "      Value:" << calc << endl;
+				x = y;
+				y = calc;
+			}
+		}
+		/*C2Ppn ppn;
 		ppn.convert(removeSpaces(str_in));
 		string function = (string)ppn.get_str_out();
 		map<int, int> iter_value;
@@ -232,7 +273,7 @@ int main()
 			cout << '\n' << "Iteration number:" << i << "      Value:" << calc << endl;
 			x = y;
 			y = calc;
-		}
+		}*/
 	}
 	catch (LPCSTR exc) {
 		cout << (LPCSTR)exc << '\n' << endl;

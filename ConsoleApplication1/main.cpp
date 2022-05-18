@@ -16,10 +16,10 @@ class C2Ppn {
 
 	char nextChar();           //get the next character from str_in
 	bool isXorY(char c);
-	int prior(char c);            //get the priority of the 
-								  //character  
+	int prior(char c);            //get the priority of the character  
+
 public:
-	int calculate_subsequence(string out, int x_in, int y_in);
+	long long calculate(string out, long long x_in, long long y_in);
 	//map<int, int> automat(string func, int x_in, int y_in, int iteration_count);
 	void convert(string);        //convert to PPN                                          
 	string get_str_out() const;   //get the output string
@@ -149,12 +149,12 @@ void C2Ppn::convert(string str) {
 		throw (string)"Error: wrong number of brackets";
 }
 
-int C2Ppn::calculate_subsequence(string str_out, int x_in, int y_in) {
-	Stack <int> stk;
-	int numerator = 0;
+long long C2Ppn::calculate(string str_out, long long x_in, long long y_in) {
+	Stack <long long> stk;
+	long long numerator = 0;
 	char check = str_out[numerator];
-	int x = 0, y = 0;
-	int result = 0;
+	long long x = 0, y = 0;
+	long long result = 0;
 	while (check != EOF && check != '\n' && check != '\0') {
 		bool flag = true;
 		string num = "";
@@ -182,7 +182,7 @@ int C2Ppn::calculate_subsequence(string str_out, int x_in, int y_in) {
 				case '*':
 					stk.push(x * y); break;
 				case '/':
-					stk.push(x / y); break;
+					stk.push((long long)(x / y)); break;
 				case '|':
 					stk.push(x | y); break;
 				case '#': //xor
@@ -194,7 +194,7 @@ int C2Ppn::calculate_subsequence(string str_out, int x_in, int y_in) {
 				case '>':
 					stk.push(x >> y); break;
 				case '^':
-					stk.push((int)pow(x, y)); break;
+					stk.push((long long)(pow((double)x, (double)y))); break;
 			}
 		}
 		if (flag) numerator++;
@@ -209,40 +209,101 @@ string removeSpaces(string input)
 	return input;
 }
 
+string to_2adic_Reverse(long long x) {
+	string buffer;
+	buffer.reserve(numeric_limits<unsigned long long>::digits);
+	do
+	{
+		buffer += char('0' + x % 2);
+		x /= 2;
+	} while (x > 0);
+	string s = string(buffer.crbegin(), buffer.crend());
+	size_t pos = 0;
+	s.insert(pos, "0"); pos++;
+	s.insert(pos, ".");
+	return s;//stoll(buffer, NULL, 10);
+}
+
+
+string to_2adic_Mon(long long x) {
+	string buffer; 
+	buffer.reserve(numeric_limits<unsigned long long>::digits);
+	do
+	{
+		buffer += char('0' + x % 2);
+		x /= 2;
+	} while (x > 0);
+	size_t pos = 0;
+	buffer.insert(pos, "0"); pos++;
+	buffer.insert(pos, ".");
+	return buffer;//stoll(buffer, NULL, 10);
+}
+
+
 int main()
 {
 	try {
 		string str_in;
 		int graph_type;
-		int iteration_count;
-		cout << '\n' << "Enter graph type: (1)graph or (2)subsequence" << '\n' << endl;;
+		int mapp_style;
+		cout << '\n' << "Enter graph type: (0)graph or (1)subsequence" << '\n' << endl;
 		cin >> graph_type;
-		if (graph_type == 1) {
+		if (graph_type > 1) return 0;
+		if (!graph_type) {
 			vector <int> x, y;
-			cout << '\n' << "Enter the number of iterations N:" << endl;
-			cin >> iteration_count;
-			cout << '\n' << "Enter " << iteration_count << " first arguments" << endl;
-			int x_i;
-			for (int i = 0; i < iteration_count; i++) {
-				cin >> x_i;
-				x.push_back(x_i);
+			cout << '\n' << "Enter in-value type: (0)range or (1)by yourself" << '\n' << endl;
+			int in_value_type;
+			cin >> in_value_type;
+			if (in_value_type > 1) return 0;
+			int N; // amount of (x, y)
+			if (in_value_type) {
+				vector <long long> x, y;
+				cout << '\n' << "Enter amount of argument pairs (x, y) N = " << endl;
+				cin >> N;
+				cout << '\n' << "Enter your "<< N <<" first arguments x" << endl;
+				long long x_i;
+				for (int i = 0; i < N; i++) x.push_back(x_i);
+				cout << '\n' << "Enter your " << N << " first arguments y" << endl;
+				long long y_i;
+				for (int i = 0; i < N; i++) y.push_back(y_i);
 			}
-			cout << '\n' << "Enter " << iteration_count << " second arguments" << endl;
-			int y_i;
-			for (int i = 0; i < iteration_count; i++) {
-				cin >> y_i;
-				y.push_back(y_i);
-			}
-			cout << '\n' << "Enter your function without spaces F(x, y) = ";
+			cout << '\n' << "Enter your function without spaces F(x, y) = " << endl; ///TODO
 			//getline(cin, str_in);
 			cin >> str_in;
 			if (str_in == "\0") return 0;
-			///TODO add graph func
+			cout << '\n' << "Choose your mapping (1)Mona or (2)Reverse" << endl;
+			cin >> mapp_style;
+			C2Ppn ppn;
+			ppn.convert(removeSpaces(str_in));
+			string function = (string)ppn.get_str_out();
+			map<long long, string> iter_value;
+			if (x.size() == 0 || y.size() == 0) {
+				long long numerator = 0;
+				for (long long i = 0; i < (long long)pow(2, 10); i++) {
+					for (long long j = 0; j < (long long)pow(2, 10); j++) { ///TODO change all to long long values and think about double
+						long long calc = ppn.calculate(function, i, j);
+						if (mapp_style == 1) iter_value[numerator] = to_2adic_Mon(calc);
+						if (mapp_style == 2) iter_value[numerator] = to_2adic_Reverse(calc);
+						numerator++;
+					}
+				}
+			}
+			else {
+				for (long long i = 0; i < N; i++) {
+					long long calc = ppn.calculate(function, x[i], y[i]);
+					if (mapp_style == 1) iter_value[i] = to_2adic_Mon(calc);
+					if (mapp_style == 2) iter_value[i] = to_2adic_Reverse(calc);
+				}
+			}
+			for (long long i = 0; i < iter_value.size(); i++) cout << i << "         " << iter_value[i] << endl;
+			///TODO TEST THIS SHIT + write to file + python printing
 		}
-		if (graph_type == 2) {
-			int x, y;
+		else {
+			long long x, y;
+			int iteration_count;
 			cout << '\n' << "Enter the number of iterations N:" << '\n' << endl;
 			cin >> iteration_count;
+			cout << '\n' << "Enter initial value (x, y)" << '\n' << endl;
 			cout << '\n' << "Enter the first argument x:" << '\n' << endl;
 			cin >> x;
 			cout << '\n' << "Enter the second argument y:" << '\n' << endl;
@@ -250,30 +311,30 @@ int main()
 			cout << '\n' << "Enter a function without spaces F(x, y) = " << '\n' << endl;
 			//getline(cin, str_in);
 			cin >> str_in;
+			cout << '\n' << "Choose your mapping (1)Mona or (2)Reverse" << endl;
+			cin >> mapp_style;
 			if (str_in == "\0") return 0;
 			C2Ppn ppn;
 			ppn.convert(removeSpaces(str_in));
 			string function = (string)ppn.get_str_out();
-			map<int, int> iter_value;
-			for (int i = 0; i < iteration_count; i++) {
-				int calc = ppn.calculate_subsequence(function, x, y);
-				iter_value[i] = calc;
-				cout << '\n' << "Iteration number:" << i << "      Value:" << calc << endl;
+			map<long long, string> iter_value;
+			if (mapp_style == 1) {
+				iter_value[0] = to_2adic_Mon(x);
+				iter_value[1] = to_2adic_Mon(y);
+			}
+			if (mapp_style == 2) {
+				iter_value[0] = to_2adic_Reverse(x);
+				iter_value[1] = to_2adic_Reverse(y);
+			}
+			for (int i = 2; i < iteration_count + 2; i++) {
+				int calc = ppn.calculate(function, x, y);
+				if (mapp_style == 1) iter_value[i] = to_2adic_Mon(calc);
+				if (mapp_style == 2) iter_value[i] = to_2adic_Reverse(calc);
+				cout << '\n' << "Iteration number:" << i << "      Value:" << iter_value[i] << endl;
 				x = y;
 				y = calc;
 			}
 		}
-		/*C2Ppn ppn;
-		ppn.convert(removeSpaces(str_in));
-		string function = (string)ppn.get_str_out();
-		map<int, int> iter_value;
-		for (int i = 0; i < iteration_count; i++) {
-			int calc = ppn.calculate(function, x, y);
-			iter_value[i] = calc;
-			cout << '\n' << "Iteration number:" << i << "      Value:" << calc << endl;
-			x = y;
-			y = calc;
-		}*/
 	}
 	catch (LPCSTR exc) {
 		cout << (LPCSTR)exc << '\n' << endl;

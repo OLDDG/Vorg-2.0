@@ -6,6 +6,8 @@
 #include <map>
 #include <iterator>
 #include <vector> 
+#include <fstream>
+#include <limits>
 
 using namespace std;
 
@@ -212,6 +214,11 @@ string removeSpaces(string input)
 string to_2adic_Reverse(long long x) {
 	string buffer;
 	buffer.reserve(numeric_limits<unsigned long long>::digits);
+	bool neg = false;
+	if (x < 0) {
+		x = -x;
+		neg = true;
+	}
 	do
 	{
 		buffer += char('0' + x % 2);
@@ -219,6 +226,17 @@ string to_2adic_Reverse(long long x) {
 	} while (x > 0);
 	string s = string(buffer.crbegin(), buffer.crend());
 	size_t pos = 0;
+	if (neg) {
+		for (long long i = 0; i < s.length(); i++) {
+			s[i] = (char)(1 - (int)(s[i] - '0') + '0');
+		}
+		for (int i = s.length() - 1; i > 0; i--) {
+			if (s[i] == '0') {
+				s[i] = '1'; break;
+			}
+			else s[i] = '0';
+		}
+	}
 	s.insert(pos, "0"); pos++;
 	s.insert(pos, ".");
 	return s;//stoll(buffer, NULL, 10);
@@ -228,74 +246,121 @@ string to_2adic_Reverse(long long x) {
 string to_2adic_Mon(long long x) {
 	string buffer; 
 	buffer.reserve(numeric_limits<unsigned long long>::digits);
+	bool neg = false;
+	if (x < 0) {
+		x = -x;
+		neg = true;
+	}
 	do
 	{
 		buffer += char('0' + x % 2);
 		x /= 2;
 	} while (x > 0);
 	size_t pos = 0;
+	if (neg) {
+		for (long long i = 0; i < buffer.length(); i++) {
+			buffer[i] = (char)(1 - (int)(buffer[i] - '0') + '0');
+		}
+		for (int i = buffer.length() - 1; i > 0; i--) {
+			if (buffer[i] == '0') {
+				buffer[i] = '1'; break;
+			}
+			else buffer[i] = '0';
+		}
+	}
 	buffer.insert(pos, "0"); pos++;
 	buffer.insert(pos, ".");
-	return buffer;//stoll(buffer, NULL, 10);
+	return buffer;
 }
 
 
 int main()
 {
 	try {
-		string str_in;
+		string str_in, rubish;
 		int graph_type;
 		int mapp_style;
+		fstream FILE;
+		FILE.open("Values.txt", fstream::out);
 		cout << '\n' << "Enter graph type: (0)graph or (1)subsequence" << '\n' << endl;
 		cin >> graph_type;
+		getline(cin, rubish);
 		if (graph_type > 1) return 0;
 		if (!graph_type) {
 			vector <int> x, y;
 			cout << '\n' << "Enter in-value type: (0)range or (1)by yourself" << '\n' << endl;
 			int in_value_type;
 			cin >> in_value_type;
+			getline(cin, rubish);
 			if (in_value_type > 1) return 0;
 			int N; // amount of (x, y)
 			if (in_value_type) {
 				vector <long long> x, y;
 				cout << '\n' << "Enter amount of argument pairs (x, y) N = " << endl;
 				cin >> N;
-				cout << '\n' << "Enter your "<< N <<" first arguments x" << endl;
+				getline(cin, rubish);
+				cout << '\n' << "Enter your " << N << " first arguments x" << endl;
 				long long x_i;
+				cin >> x_i;
+				getline(cin, rubish);
 				for (int i = 0; i < N; i++) x.push_back(x_i);
 				cout << '\n' << "Enter your " << N << " first arguments y" << endl;
 				long long y_i;
+				cin >> y_i;
+				getline(cin, rubish);
 				for (int i = 0; i < N; i++) y.push_back(y_i);
 			}
-			cout << '\n' << "Enter your function without spaces F(x, y) = " << endl; ///TODO
-			//getline(cin, str_in);
-			cin >> str_in;
+			cout << '\n' << "Enter your function F(x, y) = " << endl; ///TODO
+			getline(cin, str_in);
 			if (str_in == "\0") return 0;
 			cout << '\n' << "Choose your mapping (1)Mona or (2)Reverse" << endl;
 			cin >> mapp_style;
+			getline(cin, rubish);
 			C2Ppn ppn;
 			ppn.convert(removeSpaces(str_in));
 			string function = (string)ppn.get_str_out();
 			map<long long, string> iter_value;
-			if (x.size() == 0 || y.size() == 0) {
-				long long numerator = 0;
+			long long numerator = 0;
+			if (x.size() == 0 || y.size() == 0) {				
 				for (long long i = 0; i < (long long)pow(2, 10); i++) {
 					for (long long j = 0; j < (long long)pow(2, 10); j++) { ///TODO change all to long long values and think about double
 						long long calc = ppn.calculate(function, i, j);
-						if (mapp_style == 1) iter_value[numerator] = to_2adic_Mon(calc);
-						if (mapp_style == 2) iter_value[numerator] = to_2adic_Reverse(calc);
-						numerator++;
+						if (mapp_style == 1) {
+							iter_value[numerator] = to_2adic_Mon(i);numerator++;
+							iter_value[numerator] = to_2adic_Mon(j);numerator++;
+							iter_value[numerator] = to_2adic_Mon(calc);numerator++;
+						}
+						if (mapp_style == 2) {
+							iter_value[numerator] = to_2adic_Reverse(i); numerator++;
+							iter_value[numerator] = to_2adic_Reverse(j); numerator++;
+							iter_value[numerator] = to_2adic_Reverse(calc); numerator++;
+						}
 					}
 				}
 			}
 			else {
+				long long numerator = 0;
 				for (long long i = 0; i < N; i++) {
 					long long calc = ppn.calculate(function, x[i], y[i]);
-					if (mapp_style == 1) iter_value[i] = to_2adic_Mon(calc);
-					if (mapp_style == 2) iter_value[i] = to_2adic_Reverse(calc);
+					if (mapp_style == 1) {
+						iter_value[numerator] = to_2adic_Mon(x[i]); numerator++;
+						iter_value[numerator] = to_2adic_Mon(y[i]); numerator++;
+						iter_value[numerator] = to_2adic_Mon(calc); numerator++;
+					}
+					if (mapp_style == 2) {
+						iter_value[numerator] = to_2adic_Reverse(x[i]); numerator++;
+						iter_value[numerator] = to_2adic_Reverse(y[i]); numerator++;
+						iter_value[numerator] = to_2adic_Reverse(calc); numerator++;
+					}
 				}
 			}
-			for (long long i = 0; i < iter_value.size(); i++) cout << i << "         " << iter_value[i] << endl;
+			numerator = 0;
+			for (long long i = 0; i < iter_value.size() / 3; i++) {
+				FILE << iter_value[numerator] << "   "; numerator++;
+				FILE << iter_value[numerator] << "   "; numerator++;
+				FILE << iter_value[numerator] << "   " << endl; numerator++;
+			}
+			FILE.close();
 			///TODO TEST THIS SHIT + write to file + python printing
 		}
 		else {
@@ -303,37 +368,47 @@ int main()
 			int iteration_count;
 			cout << '\n' << "Enter the number of iterations N:" << '\n' << endl;
 			cin >> iteration_count;
+			getline(cin, rubish);
 			cout << '\n' << "Enter initial value (x, y)" << '\n' << endl;
 			cout << '\n' << "Enter the first argument x:" << '\n' << endl;
 			cin >> x;
+			getline(cin, rubish);
 			cout << '\n' << "Enter the second argument y:" << '\n' << endl;
 			cin >> y;
+			getline(cin, rubish);
 			cout << '\n' << "Enter a function without spaces F(x, y) = " << '\n' << endl;
-			//getline(cin, str_in);
-			cin >> str_in;
+			getline(cin, str_in);
 			cout << '\n' << "Choose your mapping (1)Mona or (2)Reverse" << endl;
 			cin >> mapp_style;
+			getline(cin, rubish);
 			if (str_in == "\0") return 0;
 			C2Ppn ppn;
 			ppn.convert(removeSpaces(str_in));
 			string function = (string)ppn.get_str_out();
 			map<long long, string> iter_value;
-			if (mapp_style == 1) {
-				iter_value[0] = to_2adic_Mon(x);
-				iter_value[1] = to_2adic_Mon(y);
-			}
-			if (mapp_style == 2) {
-				iter_value[0] = to_2adic_Reverse(x);
-				iter_value[1] = to_2adic_Reverse(y);
-			}
-			for (int i = 2; i < iteration_count + 2; i++) {
+			long long numerator = 0;
+			for (int i = 0; i < iteration_count; i++) {
 				int calc = ppn.calculate(function, x, y);
-				if (mapp_style == 1) iter_value[i] = to_2adic_Mon(calc);
-				if (mapp_style == 2) iter_value[i] = to_2adic_Reverse(calc);
-				cout << '\n' << "Iteration number:" << i << "      Value:" << iter_value[i] << endl;
+				if (mapp_style == 1) {
+					iter_value[numerator] = to_2adic_Mon(x); numerator++;
+					iter_value[numerator] = to_2adic_Mon(y); numerator++;
+					iter_value[numerator] = to_2adic_Mon(calc); numerator++;
+				}
+				if (mapp_style == 2) {
+					iter_value[numerator] = to_2adic_Reverse(x); numerator++;
+					iter_value[numerator] = to_2adic_Reverse(y); numerator++;
+					iter_value[numerator] = to_2adic_Reverse(calc); numerator++;
+				}
 				x = y;
 				y = calc;
 			}
+			numerator = 0;
+			for (long long i = 0; i < iter_value.size() / 3; i++) {
+				FILE << iter_value[numerator] << "   "; numerator++;
+				FILE << iter_value[numerator] << "   "; numerator++;
+				FILE << iter_value[numerator] << "   " << endl; numerator++;
+			}
+			FILE.close();
 		}
 	}
 	catch (LPCSTR exc) {

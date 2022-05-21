@@ -241,7 +241,7 @@ string to_2adic_Reverse(long long x) {
 	}
 	s.insert(pos, "0"); pos++;
 	s.insert(pos, ".");
-	return s;//stoll(buffer, NULL, 10);
+	return s;
 }
 
 
@@ -296,7 +296,7 @@ int main()
 		cin >> in_value_type;
 		getline(cin, rubish);
 		if (in_value_type > 1) return 0;
-		int N; // amount of (x, y)
+		int N; 
 		if (in_value_type) {
 			vector <long long> x, y;
 			cout << '\n' << "Enter amount of argument pairs (x, y) N = " << endl;
@@ -313,7 +313,7 @@ int main()
 			getline(cin, rubish);
 			for (int i = 0; i < N; i++) y.push_back(y_i);
 		}
-		cout << '\n' << "Enter your function F(x, y) = " << endl; ///TODO
+		cout << '\n' << "Enter your function F(x, y) = " << endl; 
 		getline(cin, str_in);
 		if (str_in == "\0") return 0;
 		cout << '\n' << "Choose your mapping (1)Mona or (2)Reverse" << endl;
@@ -324,9 +324,12 @@ int main()
 		string function = (string)ppn.get_str_out();
 		map<long long, string> iter_value;
 		long long numerator = 0;
+		int word_len = 0;
+		cout << "Enter degree of word Lengt (not more, than 16, please):" << '\n' << endl;
+		cin >> word_len;
 		if (x.size() == 0 || y.size() == 0) {				
-			for (long long i = 0; i < (long long)pow(2, 16); i++) {
-				for (long long j = 0; j < (long long)pow(2, 16); j++) { ///TODO change all to long long values and think about double
+			for (long long i = 0; i < (long long)pow(2, word_len); i++) {
+				for (long long j = 0; j < (long long)pow(2, word_len); j++) { 
 					long long calc = ppn.calculate(function, i, j);
 					if (mapp_style == 1) {
 						iter_value[numerator] = to_2adic_Mon(i);numerator++;
@@ -364,7 +367,6 @@ int main()
 			FILE << iter_value[numerator] << "   " << endl; numerator++;
 		}
 		FILE.close();
-		///TODO TEST THIS SHIT + write to file + python printing
 	}
 
 	/// subseq
@@ -406,26 +408,27 @@ int main()
 		}
 		FILE.close();
 	}
-
-	/*FILE* PScriptFile = fopen("graph_cube.py", "r");
 	
-	if (PScriptFile) { 
-		PyRun_SimpleFile(PScriptFile, "graph_cube.py");
-		fclose(PScriptFile); 
-	}*/
-
-	/*const char s1[] = "python";
-	const char s2[] = "graph_cube.py";
-	char* arg[] = {"python", "graph_cube.py", NULL };*/
-	char* args[3];
-	args[0] = "python";
-	args[1] = "graph_cube.py";
-	args[2] = NULL;
-		if (_execve(arg[0], arg, NULL) == -1)
+	//drawing
+	//grah
+	if (!graph_type) {
+		const char* const argv[] = { "python","graph_cube.py", 0 };
+		if (_execvp(argv[0], argv) == -1)
 		{
 			perror("init_compile(): execvp()");
 			return 1;
 		}
+	}
+	//subseq
+	else if (graph_type) {
+		const char* const argv[] = { "python","subseq_cube.py", 0 };
+		if (_execvp(argv[0], argv) == -1)
+		{
+			perror("init_compile(): execvp()");
+			return 1;
+		}
+	}
+	else return 1;
 
 return 0;
 }

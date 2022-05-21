@@ -27,7 +27,7 @@ for line in f:
 
 
 
-fig_c = plt.figure(figsize = (20,20))
+fig_c = plt.figure(figsize = (10,10))
 
 ax_c = fig_c.add_subplot(111, projection = '3d')
 ax_c.set_title("Cube projection")

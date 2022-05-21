@@ -298,6 +298,11 @@ int main()
 	cin >> number_graphs;
 	getline(cin, rubish);
 
+	fstream FILE;
+	FILE.open(string("number_graphs.txt"), std::fstream::out);
+	FILE << number_graphs;
+	FILE.close();
+
 	for (int i = 0; i < number_graphs; i++) {
 
 		int mapp_style;
@@ -373,12 +378,12 @@ int main()
 	
 	
 //drawing
-	/*const char* const argv[] = { "python","graph_cube.py", 0 };
+	const char* const argv[] = { "python","graph_torus.py", 0 };
 	if (_execvp(argv[0], argv) == -1)
 	{
 		perror("init_compile(): execvp()");
 		return 1;
-	}*/
+	}
 
 return 0;
 }

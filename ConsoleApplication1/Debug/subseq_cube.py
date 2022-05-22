@@ -32,4 +32,5 @@ ax_b.set_zlim(0, c)
 
 
 ax_b.scatter(x, y, z, s = 1, c = 'k')
+plt.savefig('cube_subseq.png')
 plt.show()

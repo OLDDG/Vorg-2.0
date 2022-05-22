@@ -45,9 +45,9 @@ ax_c.scatter(x, y, z, s = 1, c = 'k')
 # ax_c.view_init(90, -90)
 
 #doing gif
-angle = 3
-ani = animation.FuncAnimation(fig_c, rotate, frames=np.arange(0, 360, angle), interval=50)
-ani.save('cube_graph.gif', writer=animation.PillowWriter(fps=20)) 
+#angle = 3
+#ani = animation.FuncAnimation(fig_c, rotate, frames=np.arange(0, 360, angle), interval=50)
+#ani.save('cube_graph.gif', writer=animation.PillowWriter(fps=20)) 
 #end doing gif
-
+plt.savefig('cube_graph.png')
 plt.show()
